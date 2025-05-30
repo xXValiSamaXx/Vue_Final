@@ -1,0 +1,184 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "color": "#e74c3c",
+      "title": "Como agua para chocolate",
+      "Author": "Laura Esquivel",
+      "cover": "https://m.media-amazon.com/images/I/71ZNKREeZVL._UF894,1000_QL80_.jpg",
+      "favorite": false,
+      "available": true,
+      "isbn": "9786073804462",
+      "category": "Romance/Realismo mágico"
+    },
+    {
+      "id": 2,
+      "color": "#3498db",
+      "title": "El laberinto de la soledad",
+      "Author": "Octavio Paz",
+      "cover": "https://m.media-amazon.com/images/I/71h7diCDaML._AC_UF1000,1000_QL80_.jpg",
+      "favorite": true,
+      "available": false,
+      "isbn": "9786071139139",
+      "category": "Ensayo/Filosofía"
+    },
+    {
+      "id": 3,
+      "color": "#2ecc71",
+      "title": "Pedro Páramo",
+      "Author": "Juan Rulfo",
+      "cover": "https://m.media-amazon.com/images/I/71Iy0Svh7SL.jpg",
+      "favorite": false,
+      "available": true,
+      "isbn": "9786073804479",
+      "category": "Realismo mágico"
+    },
+    {
+      "id": 4,
+      "color": "#9b59b6",
+      "title": "Arráncame la vida",
+      "Author": "Ángeles Mastretta",
+      "cover": "https://m.media-amazon.com/images/I/61RTNaJ8qOL._AC_UF1000,1000_QL80_.jpg",
+      "favorite": true,
+      "available": true,
+      "isbn": "9786073804486",
+      "category": "Novela histórica"
+    },
+    {
+      "id": 5,
+      "color": "#f39c12",
+      "title": "La casa de los espíritus",
+      "Author": "Isabel Allende",
+      "cover": "https://m.media-amazon.com/images/I/816xOSfb2XL._UF894,1000_QL80_.jpg",
+      "favorite": false,
+      "available": true,
+      "isbn": "9786073804493",
+      "category": "Realismo mágico"
+    },
+    {
+      "id": 6,
+      "color": "#1abc9c",
+      "title": "Noticias del imperio",
+      "Author": "Fernando del Paso",
+      "cover": "https://gandhi.vtexassets.com/arquivos/ids/4404774/9786071611857.jpg?v=638465541654000000",
+      "favorite": false,
+      "available": true,
+      "isbn": "9786073804500",
+      "category": "Novela histórica"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "name": "Ana García López",
+      "email": "ana.garcia@email.com",
+      "phone": "555-0101",
+      "address": "Av. Reforma 123, CDMX",
+      "membershipDate": "2024-01-15",
+      "active": true,
+      "membershipType": "premium"
+    },
+    {
+      "id": 2,
+      "name": "Carlos Hernández",
+      "email": "carlos.hernandez@email.com",
+      "phone": "555-0102",
+      "address": "Calle Juárez 456, Guadalajara",
+      "membershipDate": "2024-02-20",
+      "active": true,
+      "membershipType": "basic"
+    },
+    {
+      "id": 3,
+      "name": "María Rodríguez",
+      "email": "maria.rodriguez@email.com",
+      "phone": "555-0103",
+      "address": "Av. Universidad 789, Monterrey",
+      "membershipDate": "2024-03-10",
+      "active": true,
+      "membershipType": "premium"
+    },
+    {
+      "id": 4,
+      "name": "Luis González",
+      "email": "luis.gonzalez@email.com",
+      "phone": "555-0104",
+      "address": "Calle Hidalgo 321, Puebla",
+      "membershipDate": "2024-01-05",
+      "active": false,
+      "membershipType": "basic"
+    },
+    {
+      "id": 5,
+      "name": "Sofia Martínez",
+      "email": "sofia.martinez@email.com",
+      "phone": "555-0105",
+      "address": "Av. Revolución 654, Tijuana",
+      "membershipDate": "2024-04-12",
+      "active": true,
+      "membershipType": "premium"
+    }
+  ],
+  "loans": [
+    {
+      "id": 1,
+      "userId": 2,
+      "bookId": 2,
+      "loanDate": "2024-05-15",
+      "dueDate": "2024-06-15",
+      "returnDate": null,
+      "status": "active",
+      "fine": 0,
+      "renewals": 0,
+      "maxRenewals": 2
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "bookId": 1,
+      "loanDate": "2024-05-01",
+      "dueDate": "2024-06-01",
+      "returnDate": "2024-05-28",
+      "status": "returned",
+      "fine": 0,
+      "renewals": 1,
+      "maxRenewals": 2
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "bookId": 4,
+      "loanDate": "2024-05-20",
+      "dueDate": "2024-06-20",
+      "returnDate": null,
+      "status": "active",
+      "fine": 0,
+      "renewals": 0,
+      "maxRenewals": 2
+    },
+    {
+      "id": 4,
+      "userId": 1,
+      "bookId": 3,
+      "loanDate": "2024-04-10",
+      "dueDate": "2024-05-10",
+      "returnDate": null,
+      "status": "overdue",
+      "fine": 50,
+      "renewals": 2,
+      "maxRenewals": 2
+    },
+    {
+      "id": 5,
+      "userId": 5,
+      "bookId": 5,
+      "loanDate": "2024-05-25",
+      "dueDate": "2024-06-25",
+      "returnDate": null,
+      "status": "active",
+      "fine": 0,
+      "renewals": 0,
+      "maxRenewals": 2
+    }
+  ]
+}
