@@ -1,32 +1,32 @@
 <template>
   <v-card class="mx-auto">
-    <!-- Contenedor principal que se adapta cuando el menú está abierto -->
+    <!-- Binding condicional de clases: aplica 'show' según computed property -->
     <v-container class="my-4 mt-5" :class="{show: Menu}">
-      <!-- Grid responsivo para mostrar los libros -->
+      <!-- Grid responsivo usando Vuetify -->
       <v-row dense>
-        <!-- Por cada libro en la lista, crea una tarjeta -->
+        <!-- v-for: directiva que itera sobre datos de entidad books desde API -->
         <v-col v-for="libro in allBooks" :key="libro.id" cols="6" class="p-2">
-          <!-- Tarjeta con el color personalizado del libro -->
+          <!-- Binding de atributos: color dinámico desde campo de entidad -->
           <v-card :color="libro.color" dark>
             <div class="d-flex flex-no-wrap justify-space-between">
               
-              <!-- Sección izquierda: Información del libro -->
+              <!-- Sección que muestra datos de entidad books -->
               <div class style="display: grid">
                 <div>
-                  <!-- Título del libro -->
+                  <!-- Interpolación: título desde campo de entidad books -->
                   <v-card-title class="headline" v-text="libro.title"></v-card-title>
-                  <!-- Autor del libro -->
+                  <!-- Interpolación: autor desde campo de entidad books -->
                   <v-card-subtitle v-text="libro.Author"></v-card-subtitle>
                 </div>
               </div>
 
-              <!-- Sección centro: Imagen de portada -->
+              <!-- Binding de atributos: URL de imagen desde entidad books -->
               <v-avatar class="ma-3" size="125" tile>
                 <v-img :src="libro.cover"></v-img>
               </v-avatar>
               
-              <!-- Sección derecha: Botón de favoritos -->
-              <!-- Si el libro YA ES favorito, muestra corazón lleno -->
+              <!-- v-if/v-else: directivas condicionales basadas en campo de entidad -->
+              <!-- Si favorite=true muestra corazón lleno -->
               <v-tooltip bottom v-if="libro.favorite">
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -45,7 +45,8 @@
                 <span>Quitar de Favoritos</span>
               </v-tooltip>
               
-              <!-- Si el libro NO ES favorito, muestra corazón vacío -->
+              <!-- v-else: directiva condicional alternativa -->
+              <!-- Si favorite=false muestra corazón vacío -->
               <v-tooltip bottom v-else>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -72,84 +73,86 @@
 </template>
 
 <script>
+// Importación de helpers Vuex para comunicación entre componentes
 import { mapGetters, mapActions, mapMutations } from "vuex";
 
 export default {
   name: "Libros",
+  // Propiedades reactivas del componente
   data() {
     return {
       option: false
     };
   },
+  // Métodos: manejan eventos y comunican con store
   methods: {
-    // Importa acciones del store para manejar libros
+    // mapActions: vincula acciones del store que consumen API
     ...mapActions(["deleteBook", "getBooks", "ToggleFavorite"]),
-    // Importa mutación para controlar el menú
+    // mapMutations: vincula mutaciones para cambio de estado inmediato
     ...mapMutations(["ToggleMenu"]),
     
-    /**
-     * Función que maneja el cambio de estado de favorito
-     * @param {Object} libro - El libro al que se le cambiará el estado
-     */
+    // Método que actualiza entidad books mediante API
     marcarFavorito(libro) {
       if (libro.favorite == true) {
-        // Si ya es favorito, lo quita de favoritos
+        // Cambio local del campo favorite en entidad books
         libro.favorite = false;
-        this.ToggleFavorite(libro); // Actualiza en la base de datos
+        // Acción que envía PUT a API para persistir cambio
+        this.ToggleFavorite(libro);
       } else {
-        // Si no es favorito, lo agrega a favoritos
+        // Cambio local del campo favorite en entidad books
         libro.favorite = true;
-        this.ToggleFavorite(libro); // Actualiza en la base de datos
+        // Acción que envía PUT a API para persistir cambio
+        this.ToggleFavorite(libro);
       }
     }
   },
+  // Computed properties: datos derivados del store global
   computed: {
-    // Importa datos del store
+    // mapGetters: vincula getters del store con computed properties
     ...mapGetters(["allBooks", "Menu"])
-    // allBooks: lista de todos los libros
-    // Menu: estado del menú (abierto/cerrado)
+    // allBooks: datos de entidad books desde API
+    // Menu: estado para binding condicional de clases CSS
   },
+  // Hook del ciclo de vida: se ejecuta al crear componente
   created() {
-    // Cuando se crea el componente, carga todos los libros desde la API
+    // Acción que consume API GET /books al inicializar componente
     this.getBooks();
   }
 };
 </script>
 
 <style>
-/* Cuando el menú está abierto, mueve el contenedor a la derecha */
+/* CSS condicional: se aplica cuando computed property Menu es true */
 .container.show {
   margin-left: 250px !important;
 }
 
-/* Permite que el título se rompa en líneas si es muy largo */
+/* Permite que el título se ajuste si es muy largo */
 .v-card__title {
   word-break: break-word !important;
 }
 
-/* Quita sombra de las tarjetas */
+/* Estilos para optimizar visualización de datos de entidad */
 .v-sheet.v-card:not(.v-sheet--outlined) {
   box-shadow: none !important;
 }
 
-/* Hace que la imagen se ajuste sin recortarse */
+/* Ajuste de imagen desde campo cover de entidad books */
 .v-image__image--cover {
   background-size: contain !important;
   background-position: right !important;
 }
 
-/* Estilo para las acciones de la tarjeta */
 .v-card__actions {
   display: flex;
   justify-content: space-between;
 }
 
-/* Quita el outline de los botones */
 button:focus {
   outline: none !important;
 }
 
-/* Posiciona el botón de corazón en la esquina inferior derecha */
+/* Posicionamiento para botón que modifica campo favorite */
 .heart {
   position: absolute;
   right: 0;
@@ -157,7 +160,6 @@ button:focus {
   bottom: 0;
 }
 
-/* Estilos para opciones (no se usan actualmente) */
 .options {
   display: none;
   transform: transition 2s;

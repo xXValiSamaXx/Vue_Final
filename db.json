@@ -125,11 +125,11 @@
       "userId": 2,
       "bookId": 2,
       "loanDate": "2024-05-15",
-      "dueDate": "2024-06-15",
+      "dueDate": "2025-06-30",
       "returnDate": null,
       "status": "active",
       "fine": 0,
-      "renewals": 0,
+      "renewals": 1,
       "maxRenewals": 2
     },
     {
@@ -149,11 +149,11 @@
       "userId": 3,
       "bookId": 4,
       "loanDate": "2024-05-20",
-      "dueDate": "2024-06-20",
+      "dueDate": "2025-06-30",
       "returnDate": null,
       "status": "active",
       "fine": 0,
-      "renewals": 0,
+      "renewals": 1,
       "maxRenewals": 2
     },
     {
@@ -173,11 +173,11 @@
       "userId": 5,
       "bookId": 5,
       "loanDate": "2024-05-25",
-      "dueDate": "2024-06-25",
+      "dueDate": "2025-06-30",
       "returnDate": null,
       "status": "active",
       "fine": 0,
-      "renewals": 0,
+      "renewals": 1,
       "maxRenewals": 2
     }
   ]

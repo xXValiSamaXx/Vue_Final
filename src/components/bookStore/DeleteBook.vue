@@ -1,31 +1,28 @@
 <template>
   <div>
-    <!-- Incluye Header y Menu en esta página -->
+    <!-- Componentes reutilizables: comunicación mediante props implícitas -->
     <Header></Header>
     <Menu></Menu>
     
     <template>
-      <!-- Contenedor que se adapta cuando el menú está abierto -->
+      <!-- Binding condicional: aplica clase según computed property del store -->
       <v-container :class="{show: Menu}">
-        <!-- Tarjeta principal -->
         <v-card class="mx-auto mt-5" tile>
-          <!-- Título de la sección -->
           <v-card-title>
             <span class="headline">Eliminar Libro</span>
           </v-card-title>
           
-          <!-- Lista de libros para eliminar -->
+          <!-- Lista que muestra datos de entidad books desde API -->
           <v-list-item two-line class="deleteList">
-            <!-- Por cada libro, crea un elemento de lista -->
+            <!-- v-for: directiva que itera sobre entidad books -->
             <v-list-item-content v-for="libro in allBooks" :key="libro.id">
-              <!-- Título del libro -->
+              <!-- Interpolación: muestra campo title de entidad books -->
               <v-list-item-title v-text="libro.title"></v-list-item-title>
-              <!-- Autor del libro -->
+              <!-- Interpolación: muestra campo Author de entidad books -->
               <v-list-item-subtitle v-text="libro.Author"></v-list-item-subtitle>
               
-              <!-- Botón para eliminar -->
               <v-btn class="delete">
-                <!-- Icono de eliminar que ejecuta la función al hacer clic -->
+                <!-- Event binding: @click ejecuta método que hace DELETE a API -->
                 <v-icon @click="eliminar(libro.id)">mdi-delete-circle mdi-36px</v-icon>
               </v-btn>
             </v-list-item-content>
@@ -34,7 +31,7 @@
       </v-container>
     </template>
     
-    <!-- Diálogo de confirmación que aparece después de eliminar -->
+    <!-- v-model: binding bidireccional para controlar modal -->
     <template>
       <div class="text-center">
         <v-dialog v-model="dialogo" width="500">
@@ -48,38 +45,37 @@
 </template>
  
 <script>
+// Importación de helpers Vuex para comunicación entre componentes
 import { mapActions, mapGetters } from "vuex";
+// Importación de componentes reutilizables
 import Header from "../common/Header";
 import Menu from "../common/Menu";
 
 export default {
   name: "EliminarLibro",
-  // Componentes que usa esta página
+  // Registro de componentes: permite reutilización en template
   components: {
     Menu,
     Header
   },
+  // Propiedades reactivas del componente
   data() {
     return {
-      dialogo: false  // Controla si se muestra el diálogo de confirmación
+      dialogo: false  // Controla visibilidad de modal de confirmación
     };
   },
   methods: {
-    // Importa acciones del store
+    // mapActions: vincula acciones del store que consumen API
     ...mapActions(["deleteBook", "getBooks"]),
     
-    /**
-     * Función que elimina un libro por su ID
-     * @param {number} id - El ID del libro a eliminar
-     */
+    // Método que elimina registro de entidad books mediante API
     eliminar(id) {
-      // Muestra el diálogo de confirmación
-      this.dialogo = true;
+      this.dialogo = true;  // Muestra modal de confirmación
       
-      // Llama a la acción del store para eliminar el libro
+      // Acción que envía DELETE a API: /books/:id
       this.deleteBook(id);
       
-      // Después de 1.5 segundos, oculta el diálogo
+      // Timeout para ocultar modal después de operación
       setTimeout(
         function() {
           this.dialogo = false;
@@ -89,47 +85,45 @@ export default {
     }
   },
   computed: {
-    // Importa datos del store
+    // mapGetters: vincula datos del store global con computed properties
     ...mapGetters(["allBooks", "Menu"])
-    // allBooks: lista de todos los libros
-    // Menu: estado del menú (abierto/cerrado)
+    // allBooks: datos de entidad books desde API GET /books
+    // Menu: estado para binding condicional de clases CSS
   },
+  // Hook del ciclo de vida: se ejecuta al crear componente
   created() {
-    // Cuando se carga la página, obtiene todos los libros
+    // Acción que consume API GET /books al inicializar
     this.getBooks();
   }
 };
 </script>
 
 <style>
-/* Hace que la lista se muestre como bloque */
+/* Estilos para lista de elementos de entidad books */
 .v-list-item.deleteList {
   display: block;
 }
 
-/* Estilo para el contenido de cada elemento de lista */
 .v-list-item__content {
   flex-wrap: nowrap !important;
   padding: 10px;
 }
 
-/* Hace que el botón se muestre como contenido normal */
 .v-btn.delete {
   display: contents;
 }
 
-/* Quita el fondo del botón */
 .v-btn:before {
   background-color: white;
 }
 
-/* Efecto hover para resaltar el elemento al pasar el mouse */
+/* Efecto hover para mejor UX al interactuar con entidad */
 .deleteList .v-list-item__content:hover {
   background: #c8c8c8 !important;
   border-radius: 25px;
 }
 
-/* Estilos para el diálogo de confirmación */
+/* Estilos para modal de confirmación */
 .v-dialog {
   -webkit-box-shadow: 0px 18px 38px 14px rgba(0, 0, 0, 0.61) !important;
   -moz-box-shadow: 0px 18px 38px 14px rgba(0, 0, 0, 0.61) !important;

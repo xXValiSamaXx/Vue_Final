@@ -1,20 +1,20 @@
 <template>
   <div>
-    <!-- Incluye Header y Menu en esta página -->
+    <!-- Uso de componentes: Header y Menu se reutilizan en múltiples vistas -->
     <Header></Header>
     <Menu></Menu>
     
-    <!-- Contenedor principal que se adapta cuando el menú está abierto -->
+    <!-- Binding de clases dinámicas: :class aplica 'show' según estado del menú -->
     <v-container :class="{show: Menu}">
       
-      <!-- SECCIÓN 1: CREAR NUEVO PRÉSTAMO (Usa las 3 tablas: users, books, loans) -->
+      <!-- SECCIÓN 1: Formulario que usa las 3 entidades (users, books, loans) -->
       <v-card class="mb-4">
         <v-card-title>
           <span class="headline">🆕 Crear Nuevo Préstamo</span>
         </v-card-title>
         <v-card-text>
           <v-row>
-            <!-- Dropdown para seleccionar USUARIO (tabla users) -->
+            <!-- v-model: binding bidireccional para capturar selección del usuario -->
             <v-col cols="6">
               <v-select
                 v-model="selectedUser"
@@ -25,9 +25,10 @@
                 prepend-icon="mdi-account"
                 :rules="[v => !!v || 'Usuario requerido']"
               >
-                <!-- Muestra nombre, email y tipo de membresía del usuario -->
+                <!-- v-slot: directiva para personalizar template de cada item -->
                 <template v-slot:item="{ item }">
                   <v-list-item-content>
+                    <!-- Interpolación: mostrar datos de entidad users -->
                     <v-list-item-title>{{ item.name }}</v-list-item-title>
                     <v-list-item-subtitle>{{ item.email }} - {{ item.membershipType }}</v-list-item-subtitle>
                   </v-list-item-content>
@@ -35,7 +36,7 @@
               </v-select>
             </v-col>
             
-            <!-- Dropdown para seleccionar LIBRO (tabla books) -->
+            <!-- v-model: binding bidireccional para capturar selección del libro -->
             <v-col cols="6">
               <v-select
                 v-model="selectedBook"
@@ -46,7 +47,7 @@
                 prepend-icon="mdi-book"
                 :rules="[v => !!v || 'Libro requerido']"
               >
-                <!-- Muestra título y autor del libro -->
+                <!-- Template personalizado para mostrar datos de entidad books -->
                 <template v-slot:item="{ item }">
                   <v-list-item-content>
                     <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -57,10 +58,10 @@
             </v-col>
           </v-row>
           
-          <!-- Botón para crear préstamo (crea registro en tabla loans) -->
+          <!-- Event binding: @click ejecuta método que crea registro en entidad loans -->
           <v-btn 
             color="primary" 
-            @click="createLoan"
+            @click="handleCreateLoan"
             :disabled="!selectedUser || !selectedBook"
             class="mr-2"
           >
@@ -70,65 +71,66 @@
         </v-card-text>
       </v-card>
 
-      <!-- SECCIÓN 2: PRÉSTAMOS ACTIVOS (Lee y combina las 3 tablas) -->
+      <!-- SECCIÓN 2: Tabla que muestra datos combinados de las 3 entidades -->
       <v-card class="mb-4">
         <v-card-title>
           <span class="headline">📚 Préstamos Activos</span>
           <v-spacer></v-spacer>
-          <!-- Botón para calcular multas automáticamente -->
-          <v-btn color="warning" @click="calculateFines" class="mr-2">
+          <!-- Método que procesa datos de las 3 tablas -->
+          <v-btn color="warning" @click="handleCalculateFines" class="mr-2">
             <v-icon left>mdi-calculator</v-icon>
             Calcular Multas
           </v-btn>
         </v-card-title>
         
-        <!-- Tabla que muestra datos combinados de las 3 tablas -->
+        <!-- Binding de datos: :items usa computed property que combina 3 entidades -->
         <v-data-table
           :headers="loanHeaders"
           :items="activeLoans"
           item-key="id"
           class="elevation-1"
         >
-          <!-- Columna de portada del libro -->
+          <!-- v-slot: template personalizado para columna de portada -->
           <template v-slot:item.bookCover="{ item }">
             <v-avatar size="40" tile>
+              <!-- Binding de atributos: :src obtiene URL de entidad books -->
               <v-img :src="item.bookCover" :alt="item.bookTitle"></v-img>
             </v-avatar>
           </template>
           
-          <!-- Columna de fecha de vencimiento con colores según urgencia -->
+          <!-- Template que usa computed property para determinar color -->
           <template v-slot:item.dueDate="{ item }">
             <v-chip 
               :color="getDueDateColor(item.dueDate)" 
               dark 
               small
             >
+              <!-- Método que formatea fecha de entidad loans -->
               {{ formatDate(item.dueDate) }}
             </v-chip>
           </template>
           
-          <!-- Columna de renovaciones (actual/máximo) -->
+          <!-- Interpolación: muestra datos de entidad loans -->
           <template v-slot:item.renewals="{ item }">
             {{ item.renewals }}/{{ item.maxRenewals }}
           </template>
           
-          <!-- Columna de acciones -->
+          <!-- Event binding: botones que modifican entidades books y loans -->
           <template v-slot:item.actions="{ item }">
-            <!-- Botón para devolver libro (actualiza las 3 tablas) -->
             <v-btn 
               color="success" 
               small 
-              @click="returnBook(item)"
+              @click="handleReturnBook(item)"
               class="mr-1"
             >
               <v-icon small>mdi-keyboard-return</v-icon>
               Devolver
             </v-btn>
-            <!-- Botón para renovar préstamo -->
+            <!-- Binding condicional: :disabled usa computed logic -->
             <v-btn 
               color="info" 
               small 
-              @click="renewLoan(item)"
+              @click="handleRenewLoan(item)"
               :disabled="item.renewals >= item.maxRenewals"
             >
               <v-icon small>mdi-refresh</v-icon>
@@ -138,39 +140,38 @@
         </v-data-table>
       </v-card>
 
-      <!-- SECCIÓN 3: PRÉSTAMOS VENCIDOS CON MULTAS -->
+      <!-- v-if: directiva condicional que muestra sección solo si hay préstamos vencidos -->
       <v-card v-if="overdueLoans.length > 0">
         <v-card-title>
           <span class="headline">⚠️ Préstamos Vencidos</span>
         </v-card-title>
         
-        <!-- Tabla específica para préstamos vencidos -->
+        <!-- Tabla que filtra datos de las 3 entidades para mostrar solo vencidos -->
         <v-data-table
           :headers="overdueHeaders"
           :items="overdueLoans"
           item-key="id"
           class="elevation-1"
         >
-          <!-- Portada del libro -->
           <template v-slot:item.bookCover="{ item }">
             <v-avatar size="40" tile>
               <v-img :src="item.bookCover" :alt="item.bookTitle"></v-img>
             </v-avatar>
           </template>
           
-          <!-- Multa calculada automáticamente -->
+          <!-- Interpolación: muestra campo calculado de entidad loans -->
           <template v-slot:item.fine="{ item }">
             <v-chip color="red" dark>
               ${{ item.fine }}
             </v-chip>
           </template>
           
-          <!-- Acción para devolver libro pagando multa -->
+          <!-- Método que actualiza múltiples entidades -->
           <template v-slot:item.actions="{ item }">
             <v-btn 
               color="success" 
               small 
-              @click="returnBookWithFine(item)"
+              @click="handleReturnBookWithFine(item)"
             >
               <v-icon small>mdi-keyboard-return</v-icon>
               Devolver (Pagar Multa)
@@ -180,13 +181,12 @@
       </v-card>
     </v-container>
 
-    <!-- DIÁLOGOS DE CONFIRMACIÓN -->
-    <!-- Diálogo de éxito -->
+    <!-- v-model: binding bidireccional para controlar visibilidad de diálogos -->
     <v-dialog v-model="successDialog" width="500">
+      <!-- Interpolación: muestra mensaje dinámico -->
       <v-alert type="success">{{ successMessage }}</v-alert>
     </v-dialog>
 
-    <!-- Diálogo de error -->
     <v-dialog v-model="errorDialog" width="500">
       <v-alert type="error">{{ errorMessage }}</v-alert>
     </v-dialog>
@@ -194,81 +194,80 @@
 </template>
 
 <script>
+// Importación de helpers de Vuex para manejo de estado global
 import { mapActions, mapGetters } from "vuex";
+// Importación de componentes reutilizables
 import Header from "../common/Header";
 import Menu from "../common/Menu";
 
 export default {
   name: "LoanManagement",
+  // Registro de componentes: permite usar Header y Menu en template
   components: {
     Header,
     Menu
   },
+  // Propiedades reactivas del componente
   data() {
     return {
-      selectedUser: null,    // ID del usuario seleccionado
-      selectedBook: null,    // ID del libro seleccionado
-      successDialog: false,  // Controla diálogo de éxito
-      errorDialog: false,    // Controla diálogo de error
-      successMessage: "",    // Mensaje de éxito
-      errorMessage: "",      // Mensaje de error
+      selectedUser: null,    // Binding bidireccional para formulario
+      selectedBook: null,    // Binding bidireccional para formulario
+      successDialog: false,  // Controla visibilidad de modal
+      errorDialog: false,    // Controla visibilidad de modal
+      successMessage: "",    // Mensaje dinámico para interpolación
+      errorMessage: "",      // Mensaje dinámico para interpolación
       
-      // Definición de columnas para tabla de préstamos activos
+      // Configuración de tabla: define estructura de datos para v-data-table
       loanHeaders: [
         { text: 'Portada', value: 'bookCover', sortable: false },
-        { text: 'Libro', value: 'bookTitle' },           // De tabla books
-        { text: 'Autor', value: 'bookAuthor' },          // De tabla books
-        { text: 'Usuario', value: 'userName' },          // De tabla users
-        { text: 'Email', value: 'userEmail' },           // De tabla users
-        { text: 'Fecha Vencimiento', value: 'dueDate' }, // De tabla loans
-        { text: 'Renovaciones', value: 'renewals' },     // De tabla loans
+        { text: 'Libro', value: 'bookTitle' },           // Campo de entidad books
+        { text: 'Autor', value: 'bookAuthor' },          // Campo de entidad books
+        { text: 'Usuario', value: 'userName' },          // Campo de entidad users
+        { text: 'Email', value: 'userEmail' },           // Campo de entidad users
+        { text: 'Fecha Vencimiento', value: 'dueDate' }, // Campo de entidad loans
+        { text: 'Renovaciones', value: 'renewals' },     // Campo de entidad loans
         { text: 'Acciones', value: 'actions', sortable: false }
       ],
       
-      // Definición de columnas para tabla de préstamos vencidos
+      // Headers para tabla de préstamos vencidos
       overdueHeaders: [
         { text: 'Portada', value: 'bookCover', sortable: false },
-        { text: 'Libro', value: 'bookTitle' },    // De tabla books
-        { text: 'Usuario', value: 'userName' },   // De tabla users
-        { text: 'Teléfono', value: 'userPhone' }, // De tabla users
-        { text: 'Multa', value: 'fine' },         // De tabla loans
+        { text: 'Libro', value: 'bookTitle' },    // Campo de entidad books
+        { text: 'Usuario', value: 'userName' },   // Campo de entidad users
+        { text: 'Teléfono', value: 'userPhone' }, // Campo de entidad users
+        { text: 'Multa', value: 'fine' },         // Campo calculado de entidad loans
         { text: 'Acciones', value: 'actions', sortable: false }
       ]
     };
   },
   
+  // Computed properties: procesan datos de múltiples entidades
   computed: {
-    // Importa getters que combinan datos de las 3 tablas
+    // mapGetters: vincula getters del store con computed properties
     ...mapGetters([
-      "Menu",           // Estado del menú
-      "activeLoans",    // Préstamos activos (combina 3 tablas)
-      "overdueLoans",   // Préstamos vencidos (combina 3 tablas)
-      "availableBooks", // Libros disponibles para préstamo
-      "activeUsers"     // Usuarios activos
+      "Menu",           // Estado del menú para binding condicional
+      "activeLoans",    // Combina datos de 3 entidades: users, books, loans
+      "overdueLoans",   // Filtra y combina datos de las 3 entidades
+      "availableBooks", // Filtra entidad books por disponibilidad
+      "activeUsers"     // Filtra entidad users por estado activo
     ])
   },
   
+  // Métodos: manejan eventos y procesan datos de las 3 entidades
   methods: {
-    // Importa acciones que trabajan con las 3 tablas
+    // mapActions: vincula actions del store con métodos del componente
     ...mapActions([
-      "loadAllData",     // Carga datos de las 3 tablas
-      "createLoan",      // Crea préstamo (actualiza 3 tablas)
-      "returnBook",      // Devuelve libro (actualiza 3 tablas)
-      "calculateFines",  // Calcula multas (lee 3 tablas)
-      "renewLoan"        // Renueva préstamo (actualiza loans)
+      "loadAllData",     // Consume API de las 3 entidades
+      "createLoan",      // Crea registro en loans, actualiza books
+      "returnBook",      // Actualiza loans y books
+      "renewLoan"        // Actualiza entidad loans
     ]),
     
-    /**
-     * PROCESO: Crear nuevo préstamo usando las 3 tablas
-     * 1. Valida usuario (tabla users)
-     * 2. Valida libro disponible (tabla books)
-     * 3. Crea registro de préstamo (tabla loans)
-     * 4. Actualiza disponibilidad del libro (tabla books)
-     */
-    async createLoan() {
+    // Método que procesa múltiples entidades para crear préstamo
+    async handleCreateLoan() {
       const result = await this.createLoan({
-        userId: this.selectedUser,
-        bookId: this.selectedBook
+        userId: this.selectedUser,    // Referencia a entidad users
+        bookId: this.selectedBook     // Referencia a entidad books
       });
       
       if (result.success) {
@@ -276,46 +275,43 @@ export default {
         this.successDialog = true;
         this.selectedUser = null;
         this.selectedBook = null;
+        
+        // Recarga datos de las 3 entidades desde API
+        await this.loadAllData();
       } else {
         this.errorMessage = "Error al crear préstamo: " + result.error;
         this.errorDialog = true;
       }
     },
     
-    /**
-     * PROCESO: Devolver libro (actualiza las 3 tablas)
-     * 1. Actualiza fecha de devolución en loans
-     * 2. Cambia status en loans
-     * 3. Marca libro como disponible en books
-     */
-    async returnBook(loan) {
+    // Método que actualiza múltiples entidades al devolver libro
+    async handleReturnBook(loan) {
       const result = await this.returnBook({
-        loanId: loan.id,
-        bookId: loan.bookId
+        loanId: loan.id,      // ID de entidad loans
+        bookId: loan.bookId   // ID de entidad books
       });
       
       if (result.success) {
         this.successMessage = `Libro "${loan.bookTitle}" devuelto exitosamente`;
         this.successDialog = true;
+        
+        // Sincroniza datos de las 3 entidades
+        await this.loadAllData();
       } else {
         this.errorMessage = "Error al devolver libro: " + result.error;
         this.errorDialog = true;
       }
     },
     
-    /**
-     * Devolver libro con multa (confirma pago antes de procesar)
-     */
-    async returnBookWithFine(loan) {
+    // Método con validación adicional para pagos de multa
+    async handleReturnBookWithFine(loan) {
       if (confirm(`¿Confirma el pago de la multa de $${loan.fine}?`)) {
-        await this.returnBook(loan);
+        await this.handleReturnBook(loan);
       }
     },
     
-    /**
-     * Renovar préstamo (extiende fecha de vencimiento)
-     */
-    async renewLoan(loan) {
+    // Método que actualiza entidad loans con nueva fecha
+    async handleRenewLoan(loan) {
       const result = await this.renewLoan({
         loanId: loan.id,
         currentRenewals: loan.renewals
@@ -324,44 +320,36 @@ export default {
       if (result.success) {
         this.successMessage = `Préstamo renovado por 1 mes más`;
         this.successDialog = true;
+        
+        await this.loadAllData();
       } else {
         this.errorMessage = result.error;
         this.errorDialog = true;
       }
     },
     
-    /**
-     * PROCESO: Calcular multas automáticamente
-     * 1. Lee todos los préstamos activos (tabla loans)
-     * 2. Compara fechas de vencimiento
-     * 3. Calcula multa ($10 por día de retraso)
-     * 4. Actualiza status y multa en loans
-     */
-    async calculateFines() {
-      const result = await this.calculateFines();
+    // Método que procesa todas las entidades para calcular multas
+    async handleCalculateFines() {
+      // Llama acción que lee loans, calcula multas y actualiza registros
+      const result = await this.$store.dispatch('calculateFines');
       
       if (result.success) {
         this.successMessage = `Multas calculadas. ${result.updatedLoans} préstamos actualizados`;
         this.successDialog = true;
+        
+        await this.loadAllData();
       } else {
         this.errorMessage = "Error al calcular multas: " + result.error;
         this.errorDialog = true;
       }
     },
     
-    /**
-     * Formatea fecha para mostrar en formato mexicano
-     */
+    // Método utilitario para formateo de fechas
     formatDate(date) {
       return new Date(date).toLocaleDateString('es-MX');
     },
     
-    /**
-     * Determina color del chip según cercanía a fecha de vencimiento
-     * Verde: más de 3 días
-     * Naranja: 3 días o menos
-     * Rojo: vencido
-     */
+    // Computed method: determina color basado en lógica de negocio
     getDueDateColor(dueDate) {
       const today = new Date();
       const due = new Date(dueDate);
@@ -373,20 +361,20 @@ export default {
     }
   },
   
+  // Hook del ciclo de vida: se ejecuta al crear el componente
   created() {
-    // Al cargar el componente, obtiene datos de las 3 tablas
+    // Carga inicial de datos de las 3 entidades desde API
     this.loadAllData();
   }
 };
 </script>
 
 <style>
-/* Cuando el menú está abierto, mueve el contenedor */
+/* Binding condicional de clases CSS */
 .container.show {
   margin-left: 250px !important;
 }
 
-/* Fondo blanco para las tablas */
 .v-data-table {
   background: white;
 }
