@@ -220,7 +220,6 @@ src/
    - Actualiza `préstamos.fechaDevolucion` y `préstamos.estatus`
    - Cambia `libros.disponible = true`
    - Libera libro para nuevos préstamos
-Configuración](https://cli.vuejs.org/config/) para personalización avanzada.
 
 ## 📝 **Notas del Proyecto**
 
